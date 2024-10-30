@@ -4,6 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
+    <script type="module" src="https://unpkg.com/arweave/build/arweave.browser.min.js"></script>
+    <script type="module" src="https://unpkg.com/@ardrive/turbo-sdk"></script>
+    <script>
+        // Mood affirmations
+        const affirmations = {
+            happy: ["You are doing great!", "Keep smiling!"],
+            sad: ["It's okay to feel down sometimes.", "This too shall pass."],
+            anxious: ["Breathe. You are safe.", "Take it one step at a time."],
+            relaxed: ["Enjoy this moment.", "You are at peace."]
+        };
+
+        // Generate a new Arweave wallet and store it in local storage
+        async function generateWallet() {
+            const arweave = window.Arweave; // Assuming Arweave is accessible
+            const jwk = await arweave.crypto.generateJWK(); // Generate a new wallet key
+            localStorage.setItem('arweaveWallet', JSON.stringify(jwk)); // Store the JWK in local storage
+            console.log('New wallet generated and stored:', jwk);
+            return jwk;
+        }
+
+        // Get the stored wallet or generate a new one if it doesn't exist
+        async function getWallet() {
+            let wallet = localStorage.getItem('arweaveWallet');
+            if (!wallet) {
+                wallet = await generateWallet(); // Generate wallet if none exists
+            } else {
+                wallet = JSON.parse(wallet); // Parse existing wallet
+            }
+            return wallet;
+        }
+
+        // Log mood to Arweave using the Turbo SDK
+        async function logMood(mood) {
+            const arweave = window.Arweave; // Assuming Arweave is accessible
+            const wallet = await getWallet();
+            const turbo = ardrive.TurboFactory.authenticated({ privateKey: wallet }); // Authenticate using the JWK
+
+            const data = {
+                mood: mood,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const tx = await turbo.uploadFile(() => {
+                    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                    return new ReadableStream({
+                        start(controller) {
+                            controller.enqueue(new Uint8Array(await blob.arrayBuffer()));
+                            controller.close();
+                        }
+                    });
+                });
+                console.log('Mood logged successfully:', tx);
+            } catch (error) {
+                console.error('Error logging mood:', error);
+            }
+        }
+
+        // Display affirmation and log mood
+        function showAffirmation() {
+            const mood = document.getElementById("mood").value;
+            const affirmation = affirmations[mood][Math.floor(Math.random() * affirmations[mood].length)];
+            document.getElementById("affirmation").innerText = affirmation;
+
+            // Log the mood to Arweave
+            logMood(mood);
+        }
+    </script>
 </head>
 <body>
     <h1>Mood Tracker</h1>
@@ -15,20 +83,8 @@
         <option value="relaxed">Relaxed</option>
     </select>
     <p id="affirmation"></p>
-
-    <script>
-        const affirmations = {
-            happy: ["You are doing great!", "Keep smiling!"],
-            sad: ["It's okay to feel down sometimes.", "This too shall pass."],
-            anxious: ["Breathe. You are safe.", "Take it one step at a time."],
-            relaxed: ["Enjoy this moment.", "You are at peace."]
-        };
-
-        function showAffirmation() {
-            const mood = document.getElementById("mood").value;
-            const affirmation = affirmations[mood][Math.floor(Math.random() * affirmations[mood].length)];
-            document.getElementById("affirmation").innerText = affirmation;
-        }
-    </script>
+    
+    <h3>Message from ChatGPT:</h3>
+    <p>"Remember, it's okay to feel your emotions. Acknowledging them is the first step to understanding yourself better!"</p>
 </body>
 </html>
