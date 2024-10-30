@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
-    <script type="module" src="js/arweave.browser.min.js"></script>
-    <script type="module" src="js/turbo-sdk.js"></script>
+    <script type="module" src="js/web.bundle.js"></script> <!-- Updated for local Arweave SDK -->
+    <script type="module" src="js/turbo-sdk.js"></script>   <!-- Ensure this is your local Turbo SDK -->
     <script>
         // Mood affirmations
         const affirmations = {
@@ -18,7 +18,7 @@
         // Generate a new Arweave wallet and store it in local storage
         async function generateWallet() {
             const arweave = window.Arweave; // Accessing the Arweave SDK
-            const jwk = await arweave.crypto.generateJWK(); // Generate a new wallet key
+            const jwk = await arweave.wallets.generate(); // Generate a new wallet key
             localStorage.setItem('arweaveWallet', JSON.stringify(jwk)); // Store the JWK in local storage
             console.log('New wallet generated and stored:', jwk);
             return jwk;
