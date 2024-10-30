@@ -1,11 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
-    <script type="module" src="https://unpkg.com/arweave/build/arweave.browser.min.js"></script>
-    <script type="module" src="https://unpkg.com/@ardrive/turbo-sdk"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/arweave@1.15.5/build/arweave.browser.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ardrive/turbo-sdk"></script>
     <script>
         // Mood affirmations
         const affirmations = {
@@ -17,7 +18,7 @@
 
         // Generate a new Arweave wallet and store it in local storage
         async function generateWallet() {
-            const arweave = window.Arweave; // Assuming Arweave is accessible
+            const arweave = window.Arweave; // Accessing the Arweave SDK
             const jwk = await arweave.crypto.generateJWK(); // Generate a new wallet key
             localStorage.setItem('arweaveWallet', JSON.stringify(jwk)); // Store the JWK in local storage
             console.log('New wallet generated and stored:', jwk);
@@ -37,7 +38,7 @@
 
         // Log mood to Arweave using the Turbo SDK
         async function logMood(mood) {
-            const arweave = window.Arweave; // Assuming Arweave is accessible
+            const arweave = window.Arweave; // Accessing the Arweave SDK
             const wallet = await getWallet();
             const turbo = ardrive.TurboFactory.authenticated({ privateKey: wallet }); // Authenticate using the JWK
 
