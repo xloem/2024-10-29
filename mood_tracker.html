@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/arweave@1.15.5/build/arweave.browser.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@ardrive/turbo-sdk"></script>
+    <script type="module" src="js/arweave.browser.min.js"></script>
+    <script type="module" src="js/turbo-sdk.js"></script>
     <script>
         // Mood affirmations
         const affirmations = {
@@ -48,11 +47,11 @@
             };
 
             try {
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
                 const tx = await turbo.uploadFile(() => {
-                    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
                     return new ReadableStream({
                         start(controller) {
-                            controller.enqueue(new Uint8Array(await blob.arrayBuffer()));
+                            controller.enqueue(new Uint8Array(blob.arrayBuffer()));
                             controller.close();
                         }
                     });
@@ -64,20 +63,25 @@
         }
 
         // Display affirmation and log mood
-        function showAffirmation() {
+        async function showAffirmation() {
             const mood = document.getElementById("mood").value;
             const affirmation = affirmations[mood][Math.floor(Math.random() * affirmations[mood].length)];
             document.getElementById("affirmation").innerText = affirmation;
 
             // Log the mood to Arweave
-            logMood(mood);
+            await logMood(mood);
         }
+
+        // Add event listener for mood selection
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById("mood").addEventListener("change", showAffirmation);
+        });
     </script>
 </head>
 <body>
     <h1>Mood Tracker</h1>
     <label for="mood">Select your mood:</label>
-    <select id="mood" onchange="showAffirmation()">
+    <select id="mood">
         <option value="happy">Happy</option>
         <option value="sad">Sad</option>
         <option value="anxious">Anxious</option>
